@@ -1,7 +1,7 @@
 import { untrack } from "svelte";
 
 export function bindController(
-    target: () => Element | undefined,
+    target: () => HTMLElement | undefined,
     centerX: () => number,
     centerY: () => number
 ) {
@@ -46,6 +46,7 @@ export function bindController(
 
     $effect(() => {
         const t = target()!
+        t.style.touchAction = "none"
         t.addEventListener("pointerdown", startMoving)
         document.addEventListener("pointermove", keepMoving)
         document.addEventListener("pointerup", stopMoving)

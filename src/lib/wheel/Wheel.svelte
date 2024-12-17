@@ -1,6 +1,6 @@
 <script lang="ts">
-import { sizeObserver } from "$lib/utils.svelte";
-import { BASE_RADIUS, TEXT_RADIUS } from "./Base.svelte";
+import { range, sizeObserver } from "$lib/utils.svelte";
+import { BASE_RADIUS, BALL_RADIUS, TEXT_RADIUS, BALL_SIZE } from "./Base.svelte";
 import { bindController } from "./bindController.svelte";
 
 interface Props {
@@ -8,10 +8,13 @@ interface Props {
     slices: number
     onpress: (slice: number) => void
     onrelease: (value: number) => void
+    colors: string[]
+    names: string[]
 }
 
-let { previewValue = $bindable(0), slices, onpress, onrelease }: Props = $props()
-let ref: SVGElement | undefined = $state()
+let { colors, names, previewValue = $bindable(0), slices, onpress, onrelease }: Props = $props()
+
+let ref: (HTMLElement & SVGElement) | undefined = $state()
 
 const size = sizeObserver(() => ref)
 
@@ -20,8 +23,9 @@ const scale = $derived(
     / (BASE_RADIUS * 2)
 )
 
-const phiRef = bindController(() => ref, () => BASE_RADIUS * scale, () => BASE_RADIUS * scale)
+let selectedSlice: number | null = $state(null)
 
+const phiRef = bindController(() => ref, () => BASE_RADIUS * scale, () => BASE_RADIUS * scale)
 
 let prevPhi: number | null = null
 let prevTime = 0
@@ -30,9 +34,10 @@ const SPEED_RANGE_BUF_SIZE = 8
 let speedRangeBuf = Array.from({ length: SPEED_RANGE_BUF_SIZE }).fill(0) as number[]
 let bufPointer = 0
 
-let speed = $state(0)
+let instantSpeed = $state(0)
+let averageSpeed = $state(0)
 let accum = 0
-const ACCUM_MAX = 20
+const ACCUM_MAX = 10
 
 function updateSpeed(time: number) {
     const phi = phiRef.value
@@ -48,7 +53,7 @@ function updateSpeed(time: number) {
             prevPhi = phi
             prevTime = time
 
-            speedRangeBuf[bufPointer++] = deltaPhi / deltaT * 1000
+            instantSpeed = speedRangeBuf[bufPointer++] = deltaPhi / deltaT * 1000
             if (bufPointer == SPEED_RANGE_BUF_SIZE)
                 bufPointer = 0;
 
@@ -57,9 +62,9 @@ function updateSpeed(time: number) {
                 sum += speedRangeBuf[i]
             }
 
-            speed = sum / SPEED_RANGE_BUF_SIZE
+            averageSpeed = sum / SPEED_RANGE_BUF_SIZE
 
-            accum += speed * speed * Math.sign(speed)
+            accum += averageSpeed
             if (Math.abs(accum) > ACCUM_MAX) {
                 const count = Math.floor(Math.abs(accum) / ACCUM_MAX)
                 previewValue -= count * Math.sign(accum)
@@ -69,13 +74,14 @@ function updateSpeed(time: number) {
             onrelease(previewValue)
             speedRangeBuf.fill(0)
             previewValue = 0
-            speed = 0
-
+            averageSpeed = 0
+            selectedSlice = null
         }
     } else if (phi !== null) { // pressed
         previewValue = 0
-        onpress(Math.floor((phi + Math.PI * (9 / 4)) / (2 * Math.PI / slices)) % slices)
-        //                        ^ 360° + 45°
+        selectedSlice = Math.floor((phi + Math.PI * (9 / 4)) / (2 * Math.PI / slices)) % slices
+        //                                ^ 360° + 45°
+        onpress(selectedSlice)
     }
     prevPhi = phi
     requestAnimationFrame(updateSpeed)
@@ -84,14 +90,11 @@ function updateSpeed(time: number) {
 $effect(() => {
     requestAnimationFrame(updateSpeed)
 })
-/*
-const vPhi = $derived.by(() => {
-    const deltaPhi = (prevPhi - phi + 3 * Math.PI) % (2 * Math.PI) - Math.PI
-    const deltaT = document.timeline.currentTime - prevTime
-    prevPhi = phi // cool side effect
-    prevTime = document.timeline.currentTime
-    return deltaPhi / deltaT * 1000
-})*/
+
+const TO_DEG = 180 / Math.PI
+const lineWidth = $derived(BALL_SIZE * Math.exp(-Math.abs(averageSpeed) / 15))
+const tailLength = $derived(Math.abs(averageSpeed) * TO_DEG / 60 * SPEED_RANGE_BUF_SIZE)
+const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - tailLength} 360`)
 
 </script>
 
@@ -113,8 +116,8 @@ const vPhi = $derived.by(() => {
         <circle
             cx="0" cy="0"
             r={BASE_RADIUS - .5}
-            stroke="gray" stroke-width="1"
-            fill="transparent" />
+            stroke="#dde" stroke-width="1"
+            fill="none" />
         <!--<circle
             cx={BASE_RADIUS * Math.cos(phiRef.value)} cy={BASE_RADIUS * Math.sin(phiRef.value)}
             r={Math.abs(speed)}
@@ -122,35 +125,33 @@ const vPhi = $derived.by(() => {
         <circle
             cx="0" cy="0"
             r={BASE_RADIUS / 3}
-            fill="gray" />
+            fill="#dde" />
 <!--         <use href="#baseline"/> -->
-<!--
-        <circle
-            cx="0" cy="0"
-            r={TEXT_RADIUS}
-            transform="rotate({phiRef.value / Math.PI * 180}) scale(Math.sign(speed))"
-            stroke="blue" stroke-width="5"
-            pathLength="360" stroke-dasharray="0 {360 - Math.abs(speed) / Math.PI * 180 / 60} 360" />-->
-<!--
-        <path
-            stroke="red" stroke-width="1" fill="none"
-            d="
-                M {TEXT_RADIUS * Math.cos(phiRef.value ?? 0)},{TEXT_RADIUS * Math.sin(phiRef.value ?? 0)}
-                a {TEXT_RADIUS} {TEXT_RADIUS} 10 0 1
-                  {TEXT_RADIUS * Math.cos(phiRef.value ?? 0 + speed)},{TEXT_RADIUS * Math.sin(phiRef.value ?? 0 + speed)}
-            "></path>-->
-
-        <text>
-            <textPath
-                startOffset="50%"
-                text-anchor="middle"
-                lengthAdjust="spacingAndGlyphs"
-                alignment-baseline="baseline"
-                href="#baseline"
-            >
-                Dangerous Curves Ahead
-            </textPath>
-        </text>
+        
+        {#each range(slices).map(i => [i, selectedSlice === null || selectedSlice === i] as const) as [i, selected]}
+            <g class="player" opacity={selected ? 1 : 0}>
+                <circle
+                    cx="0" cy="0"
+                    r={BALL_RADIUS}
+                    transform="rotate({selected && phiRef.value !== null ? phiRef.value * TO_DEG : 360 / slices * i})"
+                    stroke="{colors[i]}" stroke-width={selected ? lineWidth : BALL_SIZE} fill="none" 
+                    stroke-linecap="round" pathLength="360" stroke-dasharray={selected ? dasharray : "0 360 360"} />
+                    
+                <text transform="rotate({360 / slices * i})">
+                    <textPath
+                        startOffset="50%"
+                        text-anchor="middle"
+                        lengthAdjust="spacingAndGlyphs"
+                        alignment-baseline="baseline"
+                        href="#baseline"
+                        fill={colors[i]}
+                    >
+                        {names[i]}
+                    </textPath>
+                </text>
+            </g>
+        {/each}
+            
 
     </g>
 </svg>
@@ -161,7 +162,11 @@ svg {
     width: 100%;
     font: inherit;
 }
+.player {
+    transition: opacity .2s linear;
+}
 text {
-    font-size: .75rem;
+    font-size: 1rem;
+    font-weight: bold;
 }
 </style>
