@@ -5,41 +5,60 @@ import Controller from "$lib/wheel/Controller.svelte";
 
 let ref: SVGElement | undefined = $state()
 
-let phi: number | null = $state(0)
+let phi: number | null = $state(null)
 
-let prevPhi = 0
+let prevPhi = null
 let prevTime = 0
+let score = $state(0)
 
-const V_PHI_MEAN_COUNT = 8
-let lastVPhi = Array.from({ length: V_PHI_MEAN_COUNT }).fill(0)
-let lastAssigned = 0
+const SPEED_RANGE_BUF_SIZE = 8
+let speedRangeBuf = Array.from({ length: SPEED_RANGE_BUF_SIZE }).fill(0)
+let bufPointer = 0
 
-let vPhi = $state(0)
+let speed = $state(0)
+let accum = 0
+const ACCUM_MAX = 20
 
-function calcVPhi(time: number) {
-    const deltaPhi = (prevPhi - phi + 3 * Math.PI) % (2 * Math.PI) - Math.PI
-    const deltaT = time - prevTime
-    prevPhi = phi // cool side effect
-    prevTime = time
+function updateSpeed(time: number) {
+    if (prevPhi !== null) {
+        /* not using an && because when `phi` is null   *
+         * but `prevPhi` is not, then it means the user *
+         * has JUST released the spinner                */
+        if (phi !== null) {
+            // https://stackoverflow.com/questions/1878907/how-can-i-find-the-smallest-difference-between-two-angles-around-a-point#comment119528981_7869457
+            const deltaPhi = (prevPhi - phi + 3 * Math.PI) % (2 * Math.PI) - Math.PI
+            const deltaT = time - prevTime
+            prevPhi = phi
+            prevTime = time
 
+            speedRangeBuf[bufPointer++] = deltaPhi / deltaT * 1000
+            if (bufPointer == SPEED_RANGE_BUF_SIZE)
+                bufPointer = 0;
 
-    lastVPhi[lastAssigned++] = deltaPhi / deltaT * 1000
-    if (lastAssigned == V_PHI_MEAN_COUNT)
-        lastAssigned = 0;
+            let sum = 0
+            for (let i = 0; i < SPEED_RANGE_BUF_SIZE; i++) {
+                sum += speedRangeBuf[i]
+            }
 
-    let total = 0
-
-    for (let i = 0; i < V_PHI_MEAN_COUNT; i++) {
-        total += lastVPhi[i]
+            speed = sum / SPEED_RANGE_BUF_SIZE
+            
+            accum += speed * speed * Math.sign(speed)
+            if (Math.abs(accum) > ACCUM_MAX) {
+                const count = Math.floor(Math.abs(accum) / ACCUM_MAX)
+                score -= count * Math.sign(accum)
+                accum -= count * Math.sign(accum) * ACCUM_MAX
+            }
+        } else {
+            speedRangeBuf.fill(0)
+            speed = 0
+        }
     }
-
-    vPhi = total / V_PHI_MEAN_COUNT
-
-    requestAnimationFrame(calcVPhi)
+    prevPhi = phi
+    requestAnimationFrame(updateSpeed)
 }
 
 $effect(() => {
-    requestAnimationFrame(calcVPhi)
+    requestAnimationFrame(updateSpeed)
 })
 /*
 const vPhi = $derived.by(() => {
@@ -58,7 +77,7 @@ const scale = $derived(
 )
 </script>
 
-{vPhi}
+{score}
 <div class="wrapper">
     <svg bind:this={ref}>
         <g
@@ -68,11 +87,11 @@ const scale = $derived(
             <circle
                 cx="0" cy="0"
                 r={BASE_RADIUS - 2.5}
-                stroke="red" stroke-width="5"
+                stroke="gray" stroke-width="5"
                 fill="transparent"></circle>
             <circle
                 cx={BASE_RADIUS * Math.cos(phi)} cy={BASE_RADIUS * Math.sin(phi)}
-                r={Math.abs(vPhi)}
+                r={Math.abs(speed)}
                 fill="blue"></circle>
         </g>
     </svg>
@@ -88,6 +107,5 @@ const scale = $derived(
 svg {
     height: 100%;
     width: 100%;
-    background-color: gray;
 }
 </style>

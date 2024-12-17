@@ -4,18 +4,19 @@
 let target: HTMLElement | undefined = $state();
 
 interface Props {
-    phi?: number
+    phi: number | null
     centerX: number
     centerY: number
 }
 
-let { phi = $bindable(0), centerX, centerY }: Props = $props()
+let { phi = $bindable(null), centerX, centerY }: Props = $props()
 
 let originX = 0, originY = 0;
 let moving = false;
 
 function stopMoving(ev: PointerEvent) {
     moving = false
+    phi = null
     ev.preventDefault()
 }
 
@@ -28,6 +29,10 @@ function startMoving(ev: PointerEvent) {
     originY = rect.top;
 
     mapClientPosition(ev.clientX, ev.clientY);
+}
+
+function preventScroll(ev: TouchEvent) {
+    if (moving) ev.preventDefault()
 }
 
 function keepMoving(ev: PointerEvent) {
@@ -55,5 +60,6 @@ function mapClientPosition(clientX: number, clientY: number) {
 div {
     position: absolute;
     inset: 0;
+    touch-action: none;
 }
 </style>
