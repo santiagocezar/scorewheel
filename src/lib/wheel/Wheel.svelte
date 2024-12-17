@@ -117,14 +117,14 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
             cx="0" cy="0"
             r={BASE_RADIUS - .5}
             stroke="#dde" stroke-width="1"
-            fill="none" />
+            fill={selectedSlice === null ? "none" : colors[selectedSlice]} />
         <!--<circle
             cx={BASE_RADIUS * Math.cos(phiRef.value)} cy={BASE_RADIUS * Math.sin(phiRef.value)}
             r={Math.abs(speed)}
             fill="blue" />-->
         <circle
             cx="0" cy="0"
-            r={BASE_RADIUS / 3}
+            r={BASE_RADIUS / 4}
             fill="#dde" />
 <!--         <use href="#baseline"/> -->
         
@@ -134,7 +134,7 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
                     cx="0" cy="0"
                     r={BALL_RADIUS}
                     transform="rotate({selected && phiRef.value !== null ? phiRef.value * TO_DEG : 360 / slices * i})"
-                    stroke="{colors[i]}" stroke-width={selected ? lineWidth : BALL_SIZE} fill="none" 
+                    stroke={selectedSlice !== null && selected ? "white" : colors[i]} stroke-width={selected ? lineWidth : BALL_SIZE} fill="none"
                     stroke-linecap="round" pathLength="360" stroke-dasharray={selected ? dasharray : "0 360 360"} />
                     
                 <text transform="rotate({360 / slices * i})">
