@@ -1,7 +1,7 @@
 <script lang="ts">
 import { range, sizeObserver } from "$lib/utils.svelte";
 import ActionButton from "./ActionButton.svelte";
-import { BASE_RADIUS, BALL_RADIUS, TEXT_RADIUS, BALL_SIZE } from "./Base.svelte";
+import { BASE_RADIUS, BALL_RADIUS, TEXT_RADIUS, BALL_SIZE } from "./const";
 import { bindController } from "./bindController.svelte";
 
 interface Props {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { range } from "$lib/utils.svelte";
+import { range } from "$lib/utils.svelte";
 
 interface Props {
     colors: string[]
@@ -91,9 +91,5 @@ let total: number[] = $derived(rounds.reduce((prev, curr) => prev.map((c, i) => 
     & .score {
         font-weight: bold;
     }
-}
-.name {
-    color: var(--c);
-    font-weight: bold;
 }
 </style>

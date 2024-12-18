@@ -23,5 +23,8 @@
 		"svelte-language-server": "^0.17.7",
 		"typescript": "^5.0.0",
 		"vite": "^6.0.0"
+	},
+	"dependencies": {
+		"rambda": "^9.4.1"
 	}
 }
