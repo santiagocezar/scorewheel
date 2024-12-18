@@ -15,9 +15,10 @@ interface Props {
 
 let { colors, names, previewValue = $bindable(0), slices, onpress, onrelease }: Props = $props()
 
-let ref: (HTMLElement & SVGElement) | undefined = $state()
+let svgRef: (HTMLElement & SVGElement) | undefined = $state()
+let groupRef: SVGElement | undefined = $state()
 
-const size = sizeObserver(() => ref)
+const size = sizeObserver(() => svgRef)
 
 const scale = $derived(
     Math.min(size.width, size.height)
@@ -26,7 +27,7 @@ const scale = $derived(
 
 let selectedSlice: number | null = $state(null)
 
-const phiRef = bindController(() => ref, () => BASE_RADIUS * scale, () => BASE_RADIUS * scale)
+const phiRef = bindController(() => groupRef, () => BASE_RADIUS * scale, () => BASE_RADIUS * scale)
 
 let prevPhi: number | null = null
 let prevTime = 0
@@ -99,7 +100,7 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
 
 </script>
 
-<svg bind:this={ref}>
+<svg bind:this={svgRef}>
     <defs>
         <path
             id="baseline"
@@ -115,14 +116,16 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
         transform="translate({BASE_RADIUS * scale}, {BASE_RADIUS * scale}) scale({scale})"
     >
         <circle
+            bind:this={groupRef}
             cx="0" cy="0"
             r={BASE_RADIUS - .5}
             stroke="#dde" stroke-width="1"
-            fill={selectedSlice === null ? "none" : colors[selectedSlice]} />
+            fill={selectedSlice === null ? "white" : colors[selectedSlice]} />
         <!--<circle
             cx={BASE_RADIUS * Math.cos(phiRef.value)} cy={BASE_RADIUS * Math.sin(phiRef.value)}
             r={Math.abs(speed)}
             fill="blue" />-->
+            
         <ActionButton />
 <!--         <use href="#baseline"/> -->
 
@@ -176,6 +179,7 @@ svg {
 }
 .player {
     transition: opacity .2s linear;
+    pointer-events: none;
 }
 text {
     font-size: 1rem;
