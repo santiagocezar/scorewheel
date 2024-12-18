@@ -1,6 +1,8 @@
 <script>
 import resetSheet from '$lib/styles/reset.css?url'
 import globalSheet from '$lib/styles/global.css?url'
+import symbols from 'icons:hugeicons?prefix=hi&use=arrow-left-double,arrow-right-double,menu-01,cancel-01'
+console.log(symbols)
 
 const { children } = $props()
 </script>
@@ -16,4 +18,9 @@ const { children } = $props()
 <link rel="stylesheet" href={globalSheet}>
 </svelte:head>
 
+<svg style="display: none;">
+  <defs>
+    {@html symbols}
+  </defs>
+</svg>
 {@render children?.()}

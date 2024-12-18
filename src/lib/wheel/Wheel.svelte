@@ -1,7 +1,7 @@
 <script lang="ts">
 import { range, sizeObserver } from "$lib/utils.svelte";
 import ActionButton from "./ActionButton.svelte";
-import { BASE_RADIUS, BALL_RADIUS, TEXT_RADIUS, BALL_SIZE } from "./const";
+import { BASE_RADIUS, BALL_RADIUS, TEXT_RADIUS, BALL_SIZE, BASE_BORDER } from "./const";
 import { bindController } from "./bindController.svelte";
 
 interface Props {
@@ -118,15 +118,14 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
         <circle
             bind:this={groupRef}
             cx="0" cy="0"
-            r={BASE_RADIUS - .5}
-            stroke="#dde" stroke-width="1"
+            r={BASE_RADIUS}
+            stroke="#dde" stroke-width={BASE_BORDER}
             fill={selectedSlice === null ? "white" : colors[selectedSlice]} />
         <!--<circle
             cx={BASE_RADIUS * Math.cos(phiRef.value)} cy={BASE_RADIUS * Math.sin(phiRef.value)}
             r={Math.abs(speed)}
             fill="blue" />-->
-            
-        <ActionButton />
+
 <!--         <use href="#baseline"/> -->
 
         {#snippet player(slice: number, phi: number, selected: boolean, visible: boolean)}
@@ -165,7 +164,8 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
                 selectedSlice === null || selectedSlice === i
             )}
         {/each}
-            
+
+        <ActionButton />
 
     </g>
 </svg>

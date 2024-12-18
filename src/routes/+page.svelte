@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { range } from "$lib/utils.svelte";
-	import Standings from "$lib/wheel/Standings.svelte";
+import { range } from "$lib/utils.svelte";
+import Standings from "$lib/wheel/Standings.svelte";
 import Wheel from "$lib/wheel/Wheel.svelte";
 
 let diffPreview = $state(false)

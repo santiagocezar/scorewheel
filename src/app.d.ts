@@ -11,3 +11,8 @@ declare global {
 }
 
 export {};
+
+declare module 'icons:*' {
+	const symbols: string
+    export default symbols
+}
