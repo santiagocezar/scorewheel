@@ -3,8 +3,11 @@ import { Spring } from "svelte/motion";
 import { ACTION_BUTTON_RADIUS, ACTION_DIAL_RADIUS } from "./const";
 import { range } from "$lib/utils.svelte";
 
-const ACTIONS = 4
-const SLICE = 2 * Math.PI / ACTIONS
+const ACTIONS = [
+    { label: "Ronda anterior" },
+    { label: "Ronda siguiente" },
+]
+const SLICE = 2 * Math.PI / ACTIONS.length
 
 let open = $state(false)
 const r = Spring.of(() => open ? ACTION_DIAL_RADIUS : 0, {
@@ -35,11 +38,20 @@ $inspect(open)
     fill="#dde"
     onpointerdown={onPress} />
 
-{#each range(4) as i}
-
-<circle
-    cx={r.current * Math.cos(SLICE * i)} cy={r.current * Math.sin(SLICE * i)}
-    r={ACTION_BUTTON_RADIUS}
-    fill="#dde"
-    onpointerdown={onPress} />
+{#each range(ACTIONS.length) as i}
+<g 
+    transform="translate({r.current * Math.cos(SLICE * i)}, {r.current * Math.sin(SLICE * i)})"
+>
+    <circle
+        cx="0" cy="0"
+        r={ACTION_BUTTON_RADIUS}
+        fill="#dde"
+        onpointerdown={onPress} />
+    <text
+        x="0" y="10"
+        text-anchor="middle"
+    >
+        {ACTIONS[i].label}
+    </text>
+</g>
 {/each}

@@ -1,0 +1,15 @@
+---
+import { generateSymbols, type IconifyJSON } from '../lib/icons'
+interface Props {
+  pack: string;
+  names: string[];
+  prefix?: string;
+}
+
+const symbols = await generateSymbols(Astro.props.pack, Astro.props.names, Astro.props.prefix)
+---
+
+<svg style="display: none;">
+  <defs set:html={symbols}>
+  </defs>
+</svg>
