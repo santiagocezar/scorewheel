@@ -1,5 +1,6 @@
 <script lang="ts">
 import { range, sizeObserver } from "$lib/utils.svelte";
+import ActionButton from "./ActionButton.svelte";
 import { BASE_RADIUS, BALL_RADIUS, TEXT_RADIUS, BALL_SIZE } from "./Base.svelte";
 import { bindController } from "./bindController.svelte";
 
@@ -122,34 +123,44 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
             cx={BASE_RADIUS * Math.cos(phiRef.value)} cy={BASE_RADIUS * Math.sin(phiRef.value)}
             r={Math.abs(speed)}
             fill="blue" />-->
-        <circle
-            cx="0" cy="0"
-            r={BASE_RADIUS / 4}
-            fill="#dde" />
+        <ActionButton />
 <!--         <use href="#baseline"/> -->
-        
-        {#each range(slices).map(i => [i, selectedSlice === null || selectedSlice === i] as const) as [i, selected]}
-            <g class="player" opacity={selected ? 1 : 0}>
+
+        {#snippet player(slice: number, phi: number, selected: boolean, visible: boolean)}
+            <g class="player" opacity={visible ? 1 : 0}>
                 <circle
                     cx="0" cy="0"
                     r={BALL_RADIUS}
-                    transform="rotate({selected && phiRef.value !== null ? phiRef.value * TO_DEG : 360 / slices * i})"
-                    stroke={selectedSlice !== null && selected ? "white" : colors[i]} stroke-width={selected ? lineWidth : BALL_SIZE} fill="none"
-                    stroke-linecap="round" pathLength="360" stroke-dasharray={selected ? dasharray : "0 360 360"} />
-                    
-                <text transform="rotate({360 / slices * i})">
+                    fill="none"
+                    stroke={selected ? "white" : colors[slice]}
+                    stroke-width={selected ? lineWidth : BALL_SIZE}
+                    stroke-linecap="round"
+                    stroke-dasharray={selected ? dasharray : "0 360 360"}
+                    pathLength="360"
+                    transform="rotate({selected ? phi : 360 / slices * slice})" />
+
+                <text transform="rotate({360 / slices * slice})">
                     <textPath
                         startOffset="50%"
                         text-anchor="middle"
                         lengthAdjust="spacingAndGlyphs"
                         alignment-baseline="baseline"
                         href="#baseline"
-                        fill={colors[i]}
+                        fill={colors[slice]}
                     >
-                        {names[i]}
+                        {names[slice]}
                     </textPath>
                 </text>
             </g>
+        {/snippet}
+
+        {#each range(slices) as i}
+            {@render player(
+                i,
+                (phiRef.value ?? 0) * TO_DEG,
+                selectedSlice === i,
+                selectedSlice === null || selectedSlice === i
+            )}
         {/each}
             
 
@@ -161,6 +172,7 @@ svg {
     height: 100%;
     width: 100%;
     font: inherit;
+    user-select: none;
 }
 .player {
     transition: opacity .2s linear;
