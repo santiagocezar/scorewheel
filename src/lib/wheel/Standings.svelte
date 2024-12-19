@@ -9,7 +9,7 @@ interface Props {
 
 const { colors, names, rounds }: Props = $props();
 
-let total: number[] = $derived(rounds.reduce((prev, curr) => prev.map((c, i) => c + prev[i])))
+let total: number[] = $derived(rounds.reduce((prev, curr) => prev.map((p, i) => p + curr[i])))
 </script>
 
 <div class="standings" style="--rows: {names.length}">

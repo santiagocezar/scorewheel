@@ -24,6 +24,16 @@ function wheelReleased(d: number) {
     diffPreview = false
     diff = d
 }
+function handleAction(id: string) {
+    if (id == "next") {
+        if (rounds.length == (currentRound + 1)) {
+            rounds.push(names.map(() => 0))
+        }
+        currentRound++
+    } else {
+        currentRound = Math.max(0, currentRound - 1)
+    }
+}
 </script>
 
 <div class="view">
@@ -47,7 +57,8 @@ function wheelReleased(d: number) {
             bind:previewValue={diff}
             slices={4}
             onpress={wheelPressed}
-            onrelease={wheelReleased} />
+            onrelease={wheelReleased}
+            onaction={handleAction}/>
     </div>
 </div>
 
