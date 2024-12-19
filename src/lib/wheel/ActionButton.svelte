@@ -49,9 +49,13 @@ function onPressMiddle(ev: PointerEvent) {
 }
 
 function onLeave(ev: PointerEvent) {
-    console.log(ev.type)
     ev.preventDefault()
     keepOpen = false
+}
+
+function onEnter(ev: PointerEvent) {
+    ev.preventDefault()
+    keepOpen = true
 }
 
 function onRelease(ev: PointerEvent) {
@@ -74,7 +78,7 @@ $inspect(open)
     class="bg"
     cx="0" cy="0"
     r={open ? BASE_RADIUS : ACTION_BUTTON_RADIUS}
-    fill="#000"
+    fill="var(--text)"
     onpointerdown={onPress} />
 
 {#each actionsWithPos as action, i}
@@ -97,14 +101,14 @@ $inspect(open)
     
     <path
         d="M {ACTION_DIAL_RADIUS - 20},0 l 40,0"
-        stroke="white" 
+        stroke="var(--bg1)"
         stroke-width="1" 
         transform="rotate({180 / actionsWithPos.length * (i * 2 + 1)}) scale({open ? 1 : 0})"/>
 
     <circle
         cx="0" cy="0"
         r={ACTION_BUTTON_RADIUS}
-        fill="#000" />
+        fill="var(--text)" />
 
     <use class="menu-icon" href="#hi-menu-01" width="30" height="30" transform="scale({open ? 0 : 1})" x="-15" y="-15" />
 
@@ -112,7 +116,7 @@ $inspect(open)
         class="bg"
         cx="0" cy="0"
         r={open ? ACTION_BUTTON_RADIUS : 0}
-        fill="#fff" />
+        fill="var(--bg1)" />
 
     <use class="close-icon" href="#hi-cancel-01" width="30" height="30" transform="scale({open ? 1 : 0})" x="-15" y="-15" />
 
@@ -122,6 +126,7 @@ $inspect(open)
         fill="transparent"
         onpointerdown={onPressMiddle}
         onpointerout={onLeave}
+        onpointerenter={onEnter}
         ongotpointercapture={e => (e.target as SVGElement).releasePointerCapture(e.pointerId) }/>
     
 {/each}
@@ -130,8 +135,11 @@ $inspect(open)
     transition: transform .3s cubic-bezier(.17,.67,.12,1);
     pointer-events: none;
 }
+.close-icon {
+    color: var(--text);
+}
 .menu-icon, .action {
-    color: white;
+    color: var(--bg1);
 }
 .bg {
     transition: r .3s cubic-bezier(.17,.67,.12,1);

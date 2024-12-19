@@ -8,8 +8,8 @@ let score = $state(0)
 let diff = $state(0)
 let slice = $state(0)
 
-const colors = ["red", "orange", "royalblue", "aquamarine"]
 const names = ["Santi", "Flor", "Papá", "Mamá"]
+const colors = [7, 1, 5, 3]
 let rounds: number[][] = $state([])
 let currentRound = $state(0)
 
@@ -37,7 +37,7 @@ function handleAction(id: string) {
 </script>
 
 <div class="view">
-    <div data-hidden={!diffPreview} class="preview" style="--c: {colors[slice]}">
+    <div data-hidden={!diffPreview} class="preview pal-{colors[slice]}">
         <p class="name">{names[slice]}</p>
         <p class="diff">
             <span>{rounds[currentRound][slice]}</span>

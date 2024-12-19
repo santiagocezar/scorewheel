@@ -15,7 +15,7 @@ let total: number[] = $derived(rounds.reduce((prev, curr) => prev.map((p, i) => 
 <div class="standings" style="--rows: {names.length}">
     <div class="column score-panel">
         {#each range(names.length) as i}
-            <div class="name" style="--c: {colors[i]}">
+            <div class="name pal-{colors[i]}">
                 {names[i]}
             </div>
         {/each}
@@ -34,7 +34,7 @@ let total: number[] = $derived(rounds.reduce((prev, curr) => prev.map((p, i) => 
     </div>
     <div class="column score-panel">
         {#each range(total.length) as i}
-            <div class="name" style="--c: {colors[i]}">
+            <div class="name pal-{colors[i]}">
                 {total[i]}
             </div>
         {/each}
@@ -59,9 +59,9 @@ let total: number[] = $derived(rounds.reduce((prev, curr) => prev.map((p, i) => 
     padding: .5em;
 }
 .score-panel {
-    background-color: white;
+    background-color: var(--bg2);
     border-radius: .5rem;
-    box-shadow: 0 0 0 1px #0014;
+    box-shadow: 0 0 0 1px var(--bg3);
     grid-row: 1 / -2;
     &:first-child {
         border-top-left-radius: 0;

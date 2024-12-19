@@ -35,7 +35,7 @@
         }
     }
     .name {
-        color: var(--c);
+        color: var(--p50);
         font-weight: bold;
     }
     button {

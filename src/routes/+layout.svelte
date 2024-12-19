@@ -1,5 +1,6 @@
 <script>
 import resetSheet from '$lib/styles/reset.css?url'
+import paletteSheet from '$lib/styles/palette.scss?url'
 import globalSheet from '$lib/styles/global.css?url'
 import symbols from 'icons:hugeicons?prefix=hi&use=arrow-left-double,arrow-right-double,menu-01,cancel-01'
 console.log(symbols)
@@ -15,6 +16,7 @@ const { children } = $props()
     rel="stylesheet"
 />
 <link rel="stylesheet" href={resetSheet}>
+<link rel="stylesheet" href={paletteSheet}>
 <link rel="stylesheet" href={globalSheet}>
 </svelte:head>
 

@@ -124,8 +124,8 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
         <circle
             cx="0" cy="0"
             r={BASE_RADIUS}
-            stroke="#dde" stroke-width={BASE_BORDER}
-            fill="white"
+            stroke="var(--bg3)" stroke-width={BASE_BORDER}
+            fill="var(--bg0)"
             onpointerdown={onPress} />
         <!--<circle
             cx={BASE_RADIUS * Math.cos(phiRef.value)} cy={BASE_RADIUS * Math.sin(phiRef.value)}
@@ -135,12 +135,12 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
 <!--         <use href="#baseline"/> -->
 
         {#snippet player(slice: number, phi: number, selected: boolean, visible: boolean)}
-            <g class="player">
+            <g class="player pal-{colors[slice]}" transform="scale({visible ? 1 : 1.75})">
                 <circle
                     class="player-ball"
                     cx={selected ? 0 : BALL_RADIUS} cy="0" z="0"
                     r={visible ? selected ? BASE_RADIUS : BALL_SIZE / 2 : 0}
-                    fill={colors[slice]}
+                    fill="var(--p50)"
                     transform="rotate({selected ? phi : 360 / slices * slice})" />
                     
                 <circle
@@ -148,31 +148,26 @@ const dasharray = $derived(averageSpeed > 0 ? `${tailLength} 360` : `0 ${360 - t
                     r={BALL_RADIUS}
                     fill="none"
                     class="player-stroke"
-                    stroke={selected ? "white" : colors[slice]}
+                    stroke="var(--contrast)"
                     stroke-width={selected ? lineWidth : 0}
                     stroke-linecap="round"
                     stroke-dasharray={selected ? dasharray : "0 360 360"}
                     pathLength="360"
                     transform="rotate({selected ? phi : 360 / slices * slice})" />
-                    
-
+                <text class="pal-{colors[slice]}" transform="rotate({360 / slices * slice})">
+                    <textPath
+                        startOffset="50%"
+                        text-anchor="middle"
+                        lengthAdjust="spacingAndGlyphs"
+                        alignment-baseline="baseline"
+                        href="#baseline"
+                        fill={selected ? "var(--contrast)" : "var(--p50)"}
+                    >
+                        {names[slice]}
+                    </textPath>
+                </text>
             </g>
         {/snippet}
-
-        {#each range(slices) as slice}
-            <text transform="rotate({360 / slices * slice})">
-                <textPath
-                    startOffset="50%"
-                    text-anchor="middle"
-                    lengthAdjust="spacingAndGlyphs"
-                    alignment-baseline="baseline"
-                    href="#baseline"
-                    fill={colors[slice]}
-                >
-                    {names[slice]}
-                </textPath>
-            </text>
-        {/each}
 
         {#each range(slices) as i}
             {@render player(
@@ -205,6 +200,7 @@ svg {
 }
 .player {
     pointer-events: none;
+    transition: transform .3s cubic-bezier(.17,.67,.12,1);
 }
 .player-ball {
     transition: cx .3s cubic-bezier(.17,.67,.12,1), r .3s cubic-bezier(.17,.67,.12,1);
