@@ -12,7 +12,7 @@ declare global {
 
 export {};
 
-declare module 'icons:*' {
+declare module 'icons:symbols' {
 	const symbols: string
     export default symbols
 }

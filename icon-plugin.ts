@@ -27,26 +27,34 @@ async function generateSymbols(pack: string, names: string[], overridePrefix?: s
     return symbols
 }
 
-export default function icons() {
-    const virtualModuleId = 'icons:'
+interface PackOptions {
+    prefix?: string
+    use: string[]
+}
+
+export default function icons(opts: Record<string, PackOptions>) {
+    const virtualModuleId = 'icons:symbols'
     const resolvedVirtualModuleId = '\0' + virtualModuleId
 
     return {
         name: 'icons', // required, will show up in warnings and errors
         resolveId(id: string) {
-            if (id.startsWith(virtualModuleId)) {
-                return id.replace(virtualModuleId, resolvedVirtualModuleId)
+            if (id == virtualModuleId) {
+                return resolvedVirtualModuleId
             }
         },
         async load(id: string) {
-            if (id.startsWith(resolvedVirtualModuleId)) {
-                const { pathname, searchParams } = new URL(id)
-                console.log({ pathname, searchParams })
-                const symbols = await generateSymbols(
-                    pathname,
-                    (searchParams.get('use') ?? "").split(","),
-                    searchParams.get('prefix') ?? undefined // lol
-                )
+            if (id == resolvedVirtualModuleId) {
+                const symbols = await Promise.all(
+                    Object.entries(opts).map(([name, opts]) => (
+                        generateSymbols(
+                            name,
+                            opts.use,
+                            opts.prefix
+                        )
+                    ))
+                ).then(symbols => symbols.reduce((a, b) => a + b))
+
                 const mod = `export default ${JSON.stringify(symbols)}`
                 return mod
             }

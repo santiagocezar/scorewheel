@@ -1,11 +1,16 @@
 @use 'sass:color';
+@use 'sass:math';
 
 @function brightness($color) {
-    @return round((red($color) * 299) + (green($color) * 587) + (blue($color) * 114) / 1000);
+    @return round(
+        (color.channel($color, "red", $space: rgb) * 299) +
+        (color.channel($color, "green", $space: rgb) * 587) +
+        (color.channel($color, "blue", $space: rgb) * 0.114)
+    );
 }
 
 @function contrasting($color) {
-    @if brightness($color) < brightness(white) / 2 {
+    @if brightness($color) < math.div(brightness(white), 2) {
         @return white;
     } @else {
         @return black;
@@ -56,11 +61,11 @@
     --p90: hsl(220, 5%, 10%);
     --contrast: white;
 
-    --bg0: #ffffff;
-    --bg1: #fdfdfd;
+    --bg0: #eeeeee;
+    --bg1: #f4f4f4;
     --bg2: #fafafa;
-    --bg3: #ddd;
-    --bg4: #ccc;
+    --bg3: #fdfdfd;
+    --bg4: #ffffff;
 
     --text: #000;
     --textContrast: #fff;
